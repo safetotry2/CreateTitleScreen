@@ -8,24 +8,37 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, SecondViewControllerDelegate {
 
     @IBAction func buttonWasPressed(_ sender: Any) {
         if let vc = storyboard?.instantiateViewController(identifier: "Second") as? SecondViewController {
+            self.definesPresentationContext = true
+            self.providesPresentationContextTransitionStyle = true
+            self.overlayBlurredBackgroundView()
             present(vc, animated: true, completion: nil)
-            vc.modalPresentationStyle = .fullScreen
-            
-            
+            vc.modalPresentationStyle = .overFullScreen
+            vc.delegate = self
         }
-        
     }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .cyan
-
     }
-
+    
+    func overlayBlurredBackgroundView() {
+        let blurredBackgroundView = UIVisualEffectView()
+        blurredBackgroundView.frame = view.frame
+        blurredBackgroundView.effect = UIBlurEffect(style: .systemThinMaterialDark)
+        view.addSubview(blurredBackgroundView)
+    }
+    
+    func removeBlurredBackgroundView() {
+        for subview in view.subviews {
+            if subview.isKind(of: UIVisualEffectView.self) {
+                subview.removeFromSuperview()
+            }
+        }
+    }
 
 }

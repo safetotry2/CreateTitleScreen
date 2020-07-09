@@ -8,35 +8,40 @@
 
 import UIKit
 
+protocol SecondViewControllerDelegate: class {
+    func overlayBlurredBackgroundView()
+    func removeBlurredBackgroundView()
+}
+
 class SecondViewController: UIViewController {
 
+    weak var delegate: SecondViewControllerDelegate?
+    
+    @IBOutlet var bottomContraint: NSLayoutConstraint!
     @IBOutlet var textField: UITextField!
+    
+    @IBAction func cancelButtonPressed(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+        delegate?.removeBlurredBackgroundView()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .darkGray
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        
-        //The line below will display the keyboard over the UIView, thus obscuring it.
         textField.becomeFirstResponder()
+        view.backgroundColor = UIColor.clear
+        view.isOpaque = false
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-
+    override func viewDidLayoutSubviews() {
+        //Bottom line also works to display UIView and Keyboard at the same time.
+        //textField.becomeFirstResponder()
     }
 
     @objc func keyboardWillShow(_ notification: Notification) {
-
-        if let keyboardFrame: NSValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardRectangle = keyboardFrame.cgRectValue
-            let keyboardHeight = keyboardRectangle.height
-        }
-        let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
-        self.view.frame.origin.y = 0 - keyboardSize!.height
+        let info = notification.userInfo!
+        let kbHeight = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue.height
+        bottomContraint.constant = -kbHeight
     }
     
 }
